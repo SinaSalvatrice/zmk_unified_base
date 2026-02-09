@@ -4,13 +4,10 @@
 
 
 / {
-  keymap {
-    compatible = "zmk,keymap";
-
-    default_layer {
-      bindings = <
-        &kp A
-      >;
+    physical_layout0: physical_layout_0 {
+        compatible = "zmk,physical-layout";
+        display-name = "nicenano_4x6";
+        kscan = <&kscan0>;
+        transform = <&default_transform>;
     };
-  };
 };
