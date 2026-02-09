@@ -1,0 +1,11 @@
+/ {
+    keymap {
+        compatible = "zmk,keymap";
+
+        default_layer {
+            bindings = <
+                &bt BT_SEL 0
+            >;
+        };
+    };
+};
