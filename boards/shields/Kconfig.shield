@@ -1,3 +1,0 @@
-config SHIELD_NICENANO_4X6
-    bool "nicenano_4x6"
-    depends on ZMK_KEYBOARD
