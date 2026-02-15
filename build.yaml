@@ -1,1 +1,5 @@
 
+---
+include:
+  - board: nice_nano_v2
+    shield: unified_base
