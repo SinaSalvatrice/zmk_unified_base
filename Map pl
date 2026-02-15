@@ -1,0 +1,9 @@
+[0] = LAYOUT_ortho_6x4( /* Base */
+    KC_NO, TG(1), KC_F15,KC_BCK,
+    KC_NUM,  KC_KP_SLS, KC_KP_AST, KC_MNS,
+    KC_KP_7,   KC_KP_8,   KC_KP_9,   KC_KP_PLS,
+    KC_KP_4,   KC_KP_5,   KC_KP_6,   KC_KP_PLS,
+    KC_KP_1,   KC_KP_2,   KC_KP_3,   KC_KP_ENT,
+    KC_KP_0,   KC_KP_0,   KC_KP_DOT, KC_KP_ENT),
+
+Pro Micro NRF52840
