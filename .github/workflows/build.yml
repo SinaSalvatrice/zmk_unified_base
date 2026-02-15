@@ -1,4 +1,4 @@
-name: Build ZMK Firmware
+name: Build
 
 on:
   push:
@@ -10,21 +10,93 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  matrix:
     runs-on: ubuntu-latest
-    name: Build
+    name: Fetch Build Keyboards
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Build ZMK firmware
-        uses: zmkfirmware/zmk-build-arm@main
-        with:
-          build-args: "-p -DZMK_CONFIG=${GITHUB_WORKSPACE}/config"
+      - name: Install yaml2json
+        run: python3 -m pip install remarshal
 
-      - name: Upload firmware
-        uses: actions/upload-artifact@v3
+      - id: set-matrix
+        name: Fetch Build Matrix
+        run: |
+          matrix=$(yaml2json build.yaml | jq -c .)
+          yaml2json build.yaml
+          echo "matrix=${matrix}" >> $GITHUB_OUTPUT
+
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: zmkfirmware/zmk-build-arm:stable
+    needs: matrix
+    name: Build
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.matrix.outputs.matrix)}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache west modules
+        uses: actions/cache@v4
+        continue-on-error: true
+        env:
+          cache-name: cache-zephyr-${{ matrix.board }}-modules
         with:
-          name: firmware
           path: |
-            build/**/*.uf2
+            modules/
+            tools/
+            zephyr/
+            bootloader/
+            zmk/
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('manifest-dir/west.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: West Init
+        run: west init -l config
+
+      - name: West Update
+        run: west update
+
+      - name: West Zephyr export
+        run: west zephyr-export
+
+      - name: West Build (${{ matrix.board }})
+        shell: sh -x {0}
+        run: |
+          west build -s zmk/app -b ${{ matrix.board }} -- -DZMK_CONFIG=${GITHUB_WORKSPACE}/config ${{ matrix.cmake-args }}
+
+      - name: ${{ matrix.board }} Kconfig file
+        run: |
+          if [ -f build/zephyr/.config ]
+          then
+            grep -v -e "^#" -e "^$" build/zephyr/.config | sort
+          else
+            echo "No Kconfig output"
+          fi
+
+      - name: Rename artifacts
+        shell: sh -x {0}
+        run: |
+          mkdir build/artifacts
+          if [ -f build/zephyr/zmk.uf2 ]
+          then
+            cp build/zephyr/zmk.uf2 "build/artifacts/${{ matrix.board }}-zmk.uf2"
+          elif [ -f build/zephyr/zmk.hex ]
+          then
+            cp build/zephyr/zmk.hex "build/artifacts/${{ matrix.board }}-zmk.hex"
+          fi
+
+      - name: Archive (${{ matrix.board }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ matrix.board }}
+          path: build/artifacts
