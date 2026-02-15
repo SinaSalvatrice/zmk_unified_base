@@ -1,0 +1,6 @@
+name: zmk-keyboard-unified-base
+build:
+  cmake: .
+  kconfig: Kconfig
+  settings:
+    board_root: .
