@@ -12,8 +12,8 @@ include:
   # Split-Beispiel: ersetze <board> und <shield>
   - board: <board>
     shield: <shield>_left
-  - board: <board>
-    shield: <shield>_right
+  - board: nice_nano_zero
+    shield: numpad
 
   # Optional aber sehr praktisch: Settings-Reset UF2 mitbauen (z.B. bei Split)
   - board: <board>
