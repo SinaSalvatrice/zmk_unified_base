@@ -13,7 +13,7 @@ include:
   - board: <board>
     shield: <shield>_left
   - board: nice_nano_zero
-    shield: numpad
+    shield: promicro_4x6
 
   # Optional aber sehr praktisch: Settings-Reset UF2 mitbauen (z.B. bei Split)
   - board: <board>
